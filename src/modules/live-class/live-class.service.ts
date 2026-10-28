@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 import { sendEmail } from "../../services/email/email.service";
 import { liveClassTemplate } from "../../services/email/templates/live-class.template";
+import { clearClassroomChat } from "./chat/chat.service";
 
 export const createLiveClass = async (teacherId: string, payload: any) => {
   const startTime = new Date(payload.startTime);
@@ -228,6 +229,39 @@ export const deleteLiveClass = async (teacherId: string, id: string) => {
   });
 };
 
+export const endLiveClass = async (teacherId: string, id: string) => {
+  const liveClass = await prisma.liveClass.findFirst({
+    where: {
+      id,
+      teacherId,
+    },
+  });
+
+  if (!liveClass) {
+    throw new Error("Live class not found");
+  }
+
+  // Delete temporary classroom chat
+  await clearClassroomChat(id);
+
+  // End the live class
+  const endedClass = await prisma.liveClass.update({
+    where: {
+      id,
+    },
+    data: {
+      isActive: false,
+    },
+    include: {
+      teacher: true,
+      class: true,
+      subject: true,
+    },
+  });
+
+  return endedClass;
+};
+
 export const getUpcomingClasses = async () => {
   return prisma.liveClass.findMany({
     where: {
@@ -360,9 +394,7 @@ export const joinLiveClass = async (studentId: string, liveClassId: string) => {
   joinTime.setMinutes(joinTime.getMinutes() - JOIN_WINDOW_MINUTES);
 
   if (now < joinTime) {
-    throw new Error(
-      "You can join this class only 5 minutes before it starts.",
-    );
+    throw new Error("You can join this class only 5 minutes before it starts.");
   }
 
   if (now > liveClass.endTime) {

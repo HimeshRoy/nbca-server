@@ -77,25 +77,20 @@ export const evaluateSubmission = async (
   payload: {
     marks: number;
     remarks?: string;
-  }
+  },
 ) => {
+  const submission = await prisma.assignmentSubmission.findUnique({
+    where: {
+      id: submissionId,
+    },
+  });
 
-  const submission =
-    await prisma.assignmentSubmission.findUnique({
-      where: {
-        id: submissionId,
-      },
-    });
-
-    
   if (!submission) {
-    throw new Error(
-      "Submission not found"
-    );
+    throw new Error("Submission not found");
   }
   if (payload.marks < 0) {
-  throw new Error("Invalid marks");
-}
+    throw new Error("Invalid marks");
+  }
 
   return prisma.assignmentSubmission.update({
     where: {

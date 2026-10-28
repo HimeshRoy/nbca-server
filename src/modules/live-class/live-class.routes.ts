@@ -12,9 +12,15 @@ import {
   joinLiveClassController,
   getLiveClassAttendanceController,
   getLiveClassStatsController,
+  endLiveClassController,
 } from "./live-class.controller";
+import roomRoutes from "./room/room.routes";
+import removalRoutes from "./removal/removal.routes";
 
 const router = Router();
+
+router.use(roomRoutes);
+router.use("/remove", removalRoutes);
 
 router.post("/", auth("TEACHER"), createLiveClassController);
 
@@ -33,6 +39,8 @@ router.get(
   auth("TEACHER"),
   getLiveClassAttendanceController,
 );
+
+router.post("/:id/end", auth("TEACHER"), endLiveClassController);
 
 router.get("/:id", auth("TEACHER"), getLiveClassByIdController);
 

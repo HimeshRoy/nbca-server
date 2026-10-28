@@ -6,6 +6,7 @@ import {
   getLiveClassById,
   updateLiveClass,
   deleteLiveClass,
+  endLiveClass,
   getUpcomingClasses,
   getStudentLiveClasses,
   joinLiveClass,
@@ -58,7 +59,11 @@ export const updateLiveClassController = async (
 ) => {
   const user = (req as any).user;
 
-  const result = await updateLiveClass(user.id, req.params.id as string, req.body);
+  const result = await updateLiveClass(
+    user.id,
+    req.params.id as string,
+    req.body,
+  );
 
   res.json({
     success: true,
@@ -76,6 +81,18 @@ export const deleteLiveClassController = async (
 
   res.json({
     success: true,
+    data: result,
+  });
+};
+
+export const endLiveClassController = async (req: Request, res: Response) => {
+  const user = (req as any).user;
+
+  const result = await endLiveClass(user.id, req.params.id as string);
+
+  res.status(200).json({
+    success: true,
+    message: "Live class ended successfully.",
     data: result,
   });
 };
@@ -137,9 +154,7 @@ export const getLiveClassStatsController = async (
 ) => {
   const user = (req as any).user;
 
-  const result = await getLiveClassStats(
-    user.id,
-  );
+  const result = await getLiveClassStats(user.id);
 
   res.status(200).json({
     success: true,

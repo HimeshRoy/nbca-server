@@ -29,8 +29,18 @@ import profileRoutes from "./modules/profile/profile.routes";
 import contactRoutes from "./modules/contact/contact.routes";
 import emailRoutes from "./services/email/email.routes";
 import questionBankRoutes from "./modules/question-bank/question-bank.routes";
+import liveKitRoutes from "./modules/livekit/livekit.routes";
+import chatRoutes from "./modules/live-class/chat/chat.routes";
+import liveKitWebhookRoutes from "./modules/livekit/livekit-webhook.routes";
 
 const app = express();
+
+app.use(
+  "/api/livekit",
+  express.raw({
+    type: "application/webhook+json",
+  }),
+);
 
 app.use(
   cors({
@@ -79,6 +89,9 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/question-banks", questionBankRoutes);
+app.use("/api/livekit", liveKitRoutes);
+app.use("/api/livekit", liveKitWebhookRoutes);
+app.use("/api/live-class/chat", chatRoutes);
 
 app.use(globalErrorHandler);
 
