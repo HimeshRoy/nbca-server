@@ -1,9 +1,8 @@
 export const liveClassTemplate = (
   studentName: string,
-  classTitle: string,
-  subjectName: string,
-  teacherName: string,
-  meetingLink: string,
+  title: string,
+  subject: string,
+  teacher: string,
   startTime: Date,
 ) => {
   return `
@@ -11,19 +10,18 @@ export const liveClassTemplate = (
 
     <p>Hello ${studentName},</p>
 
-    <p>A new live class has been scheduled.</p>
+    <p>A new live class has been scheduled on NBCA.</p>
 
     <ul>
-      <li><strong>Title:</strong> ${classTitle}</li>
-      <li><strong>Subject:</strong> ${subjectName}</li>
-      <li><strong>Teacher:</strong> ${teacherName}</li>
+      <li><strong>Title:</strong> ${title}</li>
+      <li><strong>Subject:</strong> ${subject}</li>
+      <li><strong>Teacher:</strong> ${teacher}</li>
       <li><strong>Start Time:</strong> ${startTime}</li>
     </ul>
 
     <p>
-      <a href="${meetingLink}">
-        Join Live Class
-      </a>
+      You can join this class from your NBCA student dashboard when the
+      session is available.
     </p>
 
     <p>

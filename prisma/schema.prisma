@@ -535,8 +535,6 @@ model LiveClass {
   title       String
   description String?
 
-  meetingLink String
-
   startTime DateTime
   endTime   DateTime
 
