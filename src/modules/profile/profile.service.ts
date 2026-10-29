@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma";
+import { deleteFileFromCloudinaryByUrl } from "../../services/cloudinary/cloudinary.service";
 
 export const getMyProfile = async (studentId: string) => {
   return prisma.student.findUnique({
@@ -52,6 +53,19 @@ export const updateMyProfile = async (studentId: string, payload: any) => {
         throw new Error(
           "You have reached the maximum profile photo update limit.",
         );
+      }
+
+      if (student.photo) {
+        try {
+          await deleteFileFromCloudinaryByUrl(student.photo);
+        } catch (error) {
+          console.error(
+            "Failed to delete old profile photo from Cloudinary:",
+            error,
+          );
+
+          throw new Error("Failed to delete old profile photo");
+        }
       }
 
       updateData.photo = payload.photo;

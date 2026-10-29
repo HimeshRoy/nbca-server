@@ -56,17 +56,30 @@ const createStudent = async (payload) => {
 exports.createStudent = createStudent;
 const getAllStudents = async () => {
     return prisma_1.prisma.student.findMany({
-        include: {
+        select: {
             id: true,
             studentId: true,
             name: true,
             email: true,
             phone: true,
+            gender: true,
+            dateOfBirth: true,
+            guardianName: true,
+            guardianPhone: true,
+            address: true,
+            isActive: true,
+            boardId: true,
+            classId: true,
+            academicSessionId: true,
             board: true,
             class: true,
             academicSession: true,
             createdAt: true,
             updatedAt: true,
+            admissionDate: true,
+            submissions: true,
+            attendances: true,
+            testAttempts: true,
         },
     });
 };
@@ -74,25 +87,36 @@ exports.getAllStudents = getAllStudents;
 const getStudentById = async (id) => {
     return prisma_1.prisma.student.findUnique({
         where: { id },
-        include: {
+        select: {
             id: true,
             studentId: true,
             name: true,
             email: true,
             phone: true,
+            gender: true,
+            dateOfBirth: true,
+            guardianName: true,
+            guardianPhone: true,
+            address: true,
+            isActive: true,
+            boardId: true,
+            classId: true,
+            academicSessionId: true,
             board: true,
             class: true,
             academicSession: true,
             createdAt: true,
             updatedAt: true,
+            submissions: true,
+            attendances: true,
+            testAttempts: true,
         },
     });
 };
 exports.getStudentById = getStudentById;
 const updateStudent = async (id, payload) => {
     if (payload.password) {
-        payload.password =
-            await bcrypt_1.default.hash(payload.password, 10);
+        payload.password = await bcrypt_1.default.hash(payload.password, 10);
     }
     return prisma_1.prisma.student.update({
         where: { id },

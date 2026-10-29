@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAssignmentController = exports.updateAssignmentController = exports.getAssignmentByIdController = exports.getAssignmentsController = exports.createAssignmentController = void 0;
+exports.getStudentAssignmentsControllerById = exports.getStudentAssignmentsController = exports.deleteAssignmentController = exports.updateAssignmentController = exports.getAssignmentByIdController = exports.getAssignmentsController = exports.createAssignmentController = void 0;
 const assignment_service_1 = require("./assignment.service");
 const createAssignmentController = async (req, res) => {
     const user = req.user;
@@ -47,3 +47,20 @@ const deleteAssignmentController = async (req, res) => {
     });
 };
 exports.deleteAssignmentController = deleteAssignmentController;
+const getStudentAssignmentsController = async (req, res) => {
+    const result = await (0, assignment_service_1.getStudentAssignments)(req.user.id);
+    res.json({
+        success: true,
+        data: result,
+    });
+};
+exports.getStudentAssignmentsController = getStudentAssignmentsController;
+const getStudentAssignmentsControllerById = async (req, res) => {
+    const user = req.user;
+    const result = await (0, assignment_service_1.getStudentAssignmentById)(user.id, req.params.id);
+    res.json({
+        success: true,
+        data: result,
+    });
+};
+exports.getStudentAssignmentsControllerById = getStudentAssignmentsControllerById;

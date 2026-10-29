@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteContentController = exports.updateContentController = exports.getContentByIdController = exports.getAllContentsController = exports.createContentController = void 0;
+exports.getContentsByChapterController = exports.deleteContentController = exports.updateContentController = exports.getContentByIdController = exports.getAllContentsController = exports.createContentController = void 0;
 const content_service_1 = require("./content.service");
 const createContentController = async (req, res) => {
     const result = await (0, content_service_1.createContent)(req.body);
@@ -42,3 +42,11 @@ const deleteContentController = async (req, res) => {
     });
 };
 exports.deleteContentController = deleteContentController;
+const getContentsByChapterController = async (req, res) => {
+    const result = await (0, content_service_1.getContentsByChapter)(req.params.chapterId);
+    res.json({
+        success: true,
+        data: result,
+    });
+};
+exports.getContentsByChapterController = getContentsByChapterController;

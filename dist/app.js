@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 const academic_session_routes_1 = __importDefault(require("./modules/academic-session/academic-session.routes"));
 const board_routes_1 = __importDefault(require("./modules/board/board.routes"));
 const class_routes_1 = __importDefault(require("./modules/class/class.routes"));
@@ -30,7 +31,26 @@ const live_class_routes_1 = __importDefault(require("./modules/live-class/live-c
 const globalErrorHandler_1 = require("./middlewares/globalErrorHandler");
 const otp_routes_1 = __importDefault(require("./modules/otp/otp.routes"));
 const profile_routes_1 = __importDefault(require("./modules/profile/profile.routes"));
+const contact_routes_1 = __importDefault(require("./modules/contact/contact.routes"));
+const email_routes_1 = __importDefault(require("./services/email/email.routes"));
+const question_bank_routes_1 = __importDefault(require("./modules/question-bank/question-bank.routes"));
+const livekit_routes_1 = __importDefault(require("./modules/livekit/livekit.routes"));
+const chat_routes_1 = __importDefault(require("./modules/live-class/chat/chat.routes"));
+const livekit_webhook_routes_1 = __importDefault(require("./modules/livekit/livekit-webhook.routes"));
+const poll_routes_1 = __importDefault(require("./modules/live-class/poll/poll.routes"));
 const app = (0, express_1.default)();
+app.use("/api/livekit", express_1.default.raw({
+    type: "application/webhook+json",
+}));
+app.use((0, cors_1.default)({
+    origin: [
+        "http://localhost:3000",
+        "https://nbca.co.in",
+        "https://www.nbca.co.in",
+        "*",
+    ],
+    credentials: true,
+}));
 app.use(express_1.default.json());
 app.get("/", (req, res) => {
     res.send("NBCA Backend Running 🚀");
@@ -60,5 +80,12 @@ app.use("/api/results", result_routes_1.default);
 app.use("/api/notices", notice_routes_1.default);
 app.use("/api/live-classes", live_class_routes_1.default);
 app.use("/api/profile", profile_routes_1.default);
+app.use("/api/contact", contact_routes_1.default);
+app.use("/api/email", email_routes_1.default);
+app.use("/api/question-banks", question_bank_routes_1.default);
+app.use("/api/livekit", livekit_routes_1.default);
+app.use("/api/livekit", livekit_webhook_routes_1.default);
+app.use("/api/live-class/chat", chat_routes_1.default);
+app.use("/api/live-class/poll", poll_routes_1.default);
 app.use(globalErrorHandler_1.globalErrorHandler);
 exports.default = app;

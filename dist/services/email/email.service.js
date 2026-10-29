@@ -1,23 +1,33 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmail = exports.transporter = void 0;
-const nodemailer_1 = __importDefault(require("nodemailer"));
-exports.transporter = nodemailer_1.default.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+exports.sendEmail = void 0;
 const sendEmail = async (to, subject, html) => {
-    return exports.transporter.sendMail({
-        from: `"NBCA" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+            "api-key": process.env.BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+            sender: {
+                name: "NBCA",
+                email: "info@nbca.co.in",
+            },
+            to: [
+                {
+                    email: to,
+                },
+            ],
+            subject,
+            htmlContent: html,
+        }),
     });
+    const data = await response.json();
+    console.log("BREVO RESPONSE:", data);
+    if (!response.ok) {
+        throw new Error(JSON.stringify(data));
+    }
+    return data;
 };
 exports.sendEmail = sendEmail;

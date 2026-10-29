@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTestAttempts = exports.getMyAttempts = exports.attemptTest = void 0;
+exports.getStudentTestResult = exports.getTestAttempts = exports.getMyAttempts = exports.attemptTest = void 0;
 const prisma_1 = require("../../config/prisma");
 const attemptTest = async (studentId, testId, answers) => {
     const existingAttempt = await prisma_1.prisma.testAttempt.findFirst({
@@ -70,3 +70,43 @@ const getTestAttempts = async (testId) => {
     });
 };
 exports.getTestAttempts = getTestAttempts;
+const getStudentTestResult = async (studentId, testId) => {
+    const attempt = await prisma_1.prisma.testAttempt.findFirst({
+        where: {
+            studentId,
+            testId,
+        },
+        include: {
+            test: {
+                include: {
+                    subject: true,
+                    questions: true,
+                },
+            },
+            answers: {
+                include: {
+                    question: true,
+                },
+            },
+        },
+    });
+    if (!attempt) {
+        throw new Error("Result not found");
+    }
+    const totalQuestions = attempt.test.questions.length;
+    const correctAnswers = attempt.answers.filter((answer) => answer.selectedAnswer ===
+        answer.question.correctAnswer).length;
+    const wrongAnswers = attempt.answers.length - correctAnswers;
+    const unanswered = totalQuestions - attempt.answers.length;
+    const percentage = (attempt.score / attempt.test.totalMarks) * 100;
+    return {
+        ...attempt,
+        questions: attempt.test.questions,
+        totalQuestions,
+        correctAnswers,
+        wrongAnswers,
+        unanswered,
+        percentage: Number(percentage.toFixed(1)),
+    };
+};
+exports.getStudentTestResult = getStudentTestResult;

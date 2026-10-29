@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "../../config/s3";
+
+import { uploadFileToCloudinary } from "../../services/cloudinary/cloudinary.service";
 
 import {
   createTeacherResource,
@@ -17,7 +17,10 @@ export const createTeacherResourceController = async (
 ) => {
   const user = (req as any).user;
 
-  const result = await createTeacherResource(user.id, req.body);
+  const result = await createTeacherResource(
+    user.id,
+    req.body,
+  );
 
   res.status(201).json({
     success: true,
@@ -45,7 +48,10 @@ export const getTeacherResourceByIdController = async (
 ) => {
   const user = (req as any).user;
 
-  const result = await getTeacherResourceById(user.id, req.params.id as string);
+  const result = await getTeacherResourceById(
+    user.id,
+    req.params.id as string,
+  );
 
   res.json({
     success: true,
@@ -77,7 +83,10 @@ export const deleteTeacherResourceController = async (
 ) => {
   const user = (req as any).user;
 
-  const result = await deleteTeacherResource(user.id, req.params.id as string);
+  const result = await deleteTeacherResource(
+    user.id,
+    req.params.id as string,
+  );
 
   res.json({
     success: true,
@@ -90,8 +99,6 @@ export const uploadTeacherResourceController = async (
   res: Response,
 ) => {
   try {
-    const user = (req as any).user;
-
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -99,35 +106,26 @@ export const uploadTeacherResourceController = async (
       });
     }
 
-    const fileName = `${Date.now()}-${req.file.originalname}`;
-
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-
-        Key: fileName,
-
-        Body: req.file.buffer,
-
-        ContentType: req.file.mimetype,
-      }),
+    const uploadResult = await uploadFileToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
     );
 
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
       data: {
-        fileUrl,
-
+        fileUrl: uploadResult.secure_url,
         fileSize: req.file.size,
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Teacher resource Cloudinary upload failed:",
+      error,
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Upload failed",
     });

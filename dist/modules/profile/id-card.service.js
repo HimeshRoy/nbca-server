@@ -8,6 +8,7 @@ const pdfkit_1 = __importDefault(require("pdfkit"));
 const prisma_1 = require("../../config/prisma");
 const qrcode_1 = __importDefault(require("qrcode"));
 const path_1 = __importDefault(require("path"));
+const sharp_1 = __importDefault(require("sharp"));
 const generateStudentIdCard = async (studentId) => {
     const student = await prisma_1.prisma.student.findUnique({
         where: {
@@ -23,7 +24,7 @@ const generateStudentIdCard = async (studentId) => {
         throw new Error("Student not found");
     }
     // Generate QR Code
-    const verificationUrl = `https://nbca.in/verify/${student.studentId}`;
+    const verificationUrl = `https://nbca.co.in/verify/${student.studentId}`;
     const qrCodeDataUrl = await qrcode_1.default.toDataURL(verificationUrl);
     const qrImage = Buffer.from(qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""), "base64");
     // Load Student Photo
@@ -32,7 +33,16 @@ const generateStudentIdCard = async (studentId) => {
         try {
             const response = await fetch(student.photo);
             const arrayBuffer = await response.arrayBuffer();
-            photoBuffer = Buffer.from(arrayBuffer);
+            const originalBuffer = Buffer.from(arrayBuffer);
+            photoBuffer = await (0, sharp_1.default)(originalBuffer)
+                .resize(70, 70, {
+                fit: "cover",
+                position: "centre",
+            })
+                .png({
+                compressionLevel: 0,
+            })
+                .toBuffer();
         }
         catch (error) {
             console.error("Failed to load student photo:", error);
@@ -54,9 +64,10 @@ const generateStudentIdCard = async (studentId) => {
         doc.rect(0, 0, 350, 45).fill("#1E3A8A");
         // Logo
         try {
-            doc.image(logoPath, 10, 5, {
-                width: 35,
-                height: 35,
+            doc.image(logoPath, 15, 8, {
+                fit: [28, 28],
+                align: "center",
+                valign: "center",
             });
         }
         catch (error) {
@@ -65,12 +76,13 @@ const generateStudentIdCard = async (studentId) => {
         // Academy Name
         doc
             .fillColor("white")
+            .font("Helvetica-Bold")
             .fontSize(14)
-            .text("North Bengal Cloud Academy", 50, 12);
-        doc.fontSize(8).text("Student Identity Card", 50, 28);
+            .text("North Bengal Cloud Academy", 52, 10);
+        doc.font("Helvetica").fontSize(8).text("Student Identity Card", 52, 27);
         doc.fillColor("black");
         // Student Photo
-        doc.rect(18, 58, 74, 74).stroke();
+        doc.lineWidth(1.5).strokeColor("#1E40AF").rect(18, 58, 74, 74).stroke();
         if (photoBuffer) {
             doc.image(photoBuffer, 20, 60, {
                 width: 70,

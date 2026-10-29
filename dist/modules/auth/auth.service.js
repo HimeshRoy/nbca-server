@@ -124,9 +124,9 @@ const studentSignup = async (payload) => {
             id: payload.boardId,
         },
     });
-    const session = await prisma_1.prisma.academicSession.findUnique({
+    const session = await prisma_1.prisma.academicSession.findFirst({
         where: {
-            id: payload.academicSessionId,
+            status: "ACTIVE",
         },
     });
     if (!board || !session) {
@@ -137,7 +137,7 @@ const studentSignup = async (payload) => {
     const latestStudent = await prisma_1.prisma.student.findFirst({
         where: {
             boardId: payload.boardId,
-            academicSessionId: payload.academicSessionId,
+            academicSessionId: session.id,
         },
         orderBy: {
             createdAt: "desc",
@@ -153,6 +153,7 @@ const studentSignup = async (payload) => {
     const student = await prisma_1.prisma.student.create({
         data: {
             ...payload,
+            academicSessionId: session.id,
             studentId,
             password: hashedPassword,
         },
@@ -182,8 +183,16 @@ const studentSignup = async (payload) => {
         }
     }
     const { password, ...studentData } = student;
+    const token = jsonwebtoken_1.default.sign({
+        id: student.id,
+        studentId: student.studentId,
+        role: student.role,
+    }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+    });
     return {
         message: "Student registered successfully",
+        token,
         student: studentData,
     };
 };

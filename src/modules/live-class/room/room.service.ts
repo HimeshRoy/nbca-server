@@ -86,5 +86,19 @@ export const createLiveClassRoomToken = async (
     liveClassId: liveClass.id,
     role,
     displayName,
+
+    liveClass: {
+      id: liveClass.id,
+      title: liveClass.title,
+      description: liveClass.description,
+
+      teacher: liveClass.teacher,
+      class: liveClass.class,
+      subject: liveClass.subject,
+
+      startTime: liveClass.startTime,
+      endTime: liveClass.endTime,
+      isActive: liveClass.isActive,
+    },
   };
 };

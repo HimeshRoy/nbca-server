@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_1 = require("../../middlewares/auth");
+const upload_1 = require("../../middlewares/upload");
 const submission_controller_1 = require("./submission.controller");
 const router = (0, express_1.Router)();
-router.post("/:assignmentId", (0, auth_1.auth)("STUDENT"), submission_controller_1.submitAssignmentController);
+router.post("/:assignmentId", (0, auth_1.auth)("STUDENT"), upload_1.upload.single("file"), submission_controller_1.submitAssignmentController);
 router.get("/my", (0, auth_1.auth)("STUDENT"), submission_controller_1.getMySubmissionsController);
 router.patch("/:id/evaluate", (0, auth_1.auth)("TEACHER"), submission_controller_1.evaluateSubmissionController);
 router.get("/assignment/:assignmentId", (0, auth_1.auth)("TEACHER"), submission_controller_1.getAssignmentSubmissionsController);

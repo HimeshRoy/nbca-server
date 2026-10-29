@@ -3,6 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluateSubmission = exports.getAssignmentSubmissions = exports.getMySubmissions = exports.submitAssignment = void 0;
 const prisma_1 = require("../../config/prisma");
 const submitAssignment = async (studentId, assignmentId, payload) => {
+    const assignment = await prisma_1.prisma.assignment.findUnique({
+        where: {
+            id: assignmentId,
+        },
+    });
+    if (!assignment) {
+        throw new Error("Assignment not found");
+    }
+    if (new Date() > assignment.dueDate) {
+        throw new Error("Assignment submission deadline has passed.");
+    }
     const existingSubmission = await prisma_1.prisma.assignmentSubmission.findFirst({
         where: {
             assignmentId,

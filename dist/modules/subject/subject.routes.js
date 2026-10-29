@@ -2,7 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const subject_controller_1 = require("./subject.controller");
+const auth_1 = require("../../middlewares/auth");
 const router = (0, express_1.Router)();
 router.post("/", subject_controller_1.createSubjectController);
 router.get("/", subject_controller_1.getAllSubjectsController);
+router.get("/student", (0, auth_1.auth)("STUDENT"), subject_controller_1.getStudentSubjectsController);
+router.get("/:id", subject_controller_1.getSubjectByIdController);
+router.patch("/:id", subject_controller_1.updateSubjectController);
+router.delete("/:id", subject_controller_1.deleteSubjectController);
 exports.default = router;

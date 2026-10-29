@@ -5,4 +5,7 @@ const class_controller_1 = require("./class.controller");
 const router = (0, express_1.Router)();
 router.post("/", class_controller_1.createClassController);
 router.get("/", class_controller_1.getAllClassesController);
+router.get("/:id", class_controller_1.getClassByIdController);
+router.patch("/:id", class_controller_1.updateClassController);
+router.delete("/:id", class_controller_1.deleteClassController);
 exports.default = router;

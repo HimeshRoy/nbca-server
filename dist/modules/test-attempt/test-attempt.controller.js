@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTestAttemptsController = exports.getMyAttemptsController = exports.attemptTestController = void 0;
+exports.getStudentTestResultController = exports.getTestAttemptsController = exports.getMyAttemptsController = exports.attemptTestController = void 0;
 const test_attempt_service_1 = require("./test-attempt.service");
 const attemptTestController = async (req, res) => {
     const user = req.user;
@@ -28,3 +28,20 @@ const getTestAttemptsController = async (req, res) => {
     });
 };
 exports.getTestAttemptsController = getTestAttemptsController;
+const getStudentTestResultController = async (req, res) => {
+    try {
+        const result = await (0, test_attempt_service_1.getStudentTestResult)(req.user.id, req.params.testId);
+        res.status(200).json({
+            success: true,
+            message: "Result fetched successfully.",
+            data: result,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+exports.getStudentTestResultController = getStudentTestResultController;

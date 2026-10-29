@@ -16,8 +16,9 @@ const auth = (...roles) => {
                 });
             }
             const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-            if (roles.length &&
-                !roles.includes(decoded.role)) {
+            console.log("JWT Payload:", decoded);
+            console.log("Allowed Roles:", roles);
+            if (roles.length && !roles.includes(decoded.role)) {
                 return res.status(403).json({
                     success: false,
                     message: "Access Denied",

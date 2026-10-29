@@ -7,4 +7,5 @@ const router = (0, express_1.Router)();
 router.post("/", (0, auth_1.auth)("TEACHER"), attendance_controller_1.createAttendanceController);
 router.get("/", (0, auth_1.auth)("TEACHER"), attendance_controller_1.getAttendanceController);
 router.get("/my", (0, auth_1.auth)("STUDENT"), attendance_controller_1.getMyAttendanceController);
+router.post("/live-class/:liveClassId/leave", (0, auth_1.auth)("STUDENT"), attendance_controller_1.markLiveClassLeaveController);
 exports.default = router;

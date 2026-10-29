@@ -8,6 +8,7 @@ const router = (0, express_1.Router)();
 router.post("/upload", (0, auth_1.auth)("TEACHER"), upload_1.upload.single("file"), teacher_resource_controller_1.uploadTeacherResourceController);
 router.post("/", (0, auth_1.auth)("TEACHER"), teacher_resource_controller_1.createTeacherResourceController);
 router.get("/", (0, auth_1.auth)("TEACHER"), teacher_resource_controller_1.getTeacherResourcesController);
+router.get("/stats", (0, auth_1.auth)("TEACHER"), teacher_resource_controller_1.getTeacherResourceStatsController);
 router.get("/:id", (0, auth_1.auth)("TEACHER"), teacher_resource_controller_1.getTeacherResourceByIdController);
 router.patch("/:id", (0, auth_1.auth)("TEACHER"), teacher_resource_controller_1.updateTeacherResourceController);
 router.delete("/:id", (0, auth_1.auth)("TEACHER"), teacher_resource_controller_1.deleteTeacherResourceController);

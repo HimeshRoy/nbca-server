@@ -32,6 +32,7 @@ import questionBankRoutes from "./modules/question-bank/question-bank.routes";
 import liveKitRoutes from "./modules/livekit/livekit.routes";
 import chatRoutes from "./modules/live-class/chat/chat.routes";
 import liveKitWebhookRoutes from "./modules/livekit/livekit-webhook.routes";
+import pollRoutes from "./modules/live-class/poll/poll.routes";
 
 const app = express();
 
@@ -92,6 +93,7 @@ app.use("/api/question-banks", questionBankRoutes);
 app.use("/api/livekit", liveKitRoutes);
 app.use("/api/livekit", liveKitWebhookRoutes);
 app.use("/api/live-class/chat", chatRoutes);
+app.use("/api/live-class/poll", pollRoutes);
 
 app.use(globalErrorHandler);
 

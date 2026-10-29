@@ -6,6 +6,8 @@ const test_controller_1 = require("./test.controller");
 const router = (0, express_1.Router)();
 router.post("/", (0, auth_1.auth)("TEACHER"), test_controller_1.createTestController);
 router.get("/", (0, auth_1.auth)("TEACHER"), test_controller_1.getTestsController);
+router.get("/student", (0, auth_1.auth)("STUDENT"), test_controller_1.getStudentTestsController);
+router.get("/student/:id", (0, auth_1.auth)("STUDENT"), test_controller_1.getStudentTestByIdController);
 router.get("/:id", (0, auth_1.auth)("TEACHER"), test_controller_1.getTestByIdController);
 router.patch("/:id", (0, auth_1.auth)("TEACHER"), test_controller_1.updateTestController);
 router.delete("/:id", (0, auth_1.auth)("TEACHER"), test_controller_1.deleteTestController);

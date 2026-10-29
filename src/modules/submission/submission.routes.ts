@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { auth } from "../../middlewares/auth";
+import { upload } from "../../middlewares/upload";
 
 import {
   submitAssignmentController,
@@ -10,7 +11,12 @@ import {
 
 const router = Router();
 
-router.post("/:assignmentId", auth("STUDENT"), submitAssignmentController);
+router.post(
+  "/:assignmentId",
+  auth("STUDENT"),
+  upload.single("file"),
+  submitAssignmentController,
+);
 
 router.get("/my", auth("STUDENT"), getMySubmissionsController);
 

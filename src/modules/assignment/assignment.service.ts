@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma";
+import { deleteFileFromCloudinaryByUrl } from "../../services/cloudinary/cloudinary.service";
 
 export const createAssignment = async (teacherId: string, payload: any) => {
   return prisma.assignment.create({
@@ -118,6 +119,18 @@ export const deleteAssignment = async (teacherId: string, id: string) => {
     throw new Error("Assignment not found");
   }
 
+  // Delete the assignment file from Cloudinary
+  if (assignment.fileUrl) {
+    try {
+      await deleteFileFromCloudinaryByUrl(assignment.fileUrl);
+    } catch (error) {
+      console.error("Failed to delete assignment file from Cloudinary:", error);
+
+      throw new Error("Failed to delete assignment file");
+    }
+  }
+
+  // Delete the assignment from the database
   return prisma.assignment.delete({
     where: {
       id,

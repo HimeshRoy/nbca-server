@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { uploadFileToCloudinary } from "../../services/cloudinary/cloudinary.service";
 import {
   getMyProfile,
   updateMyProfile,
@@ -19,12 +20,38 @@ export const updateMyProfileController = async (
   req: Request,
   res: Response,
 ) => {
-  const result = await updateMyProfile((req as any).user.id, req.body);
+  try {
+    const user = (req as any).user;
 
-  res.status(200).json({
-    success: true,
-    data: result,
-  });
+    let photo: string | undefined;
+
+    if (req.file) {
+      const uploadResult = await uploadFileToCloudinary(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+      );
+
+      photo = uploadResult.secure_url;
+    }
+
+    const result = await updateMyProfile(user.id, {
+      ...req.body,
+      ...(photo && { photo }),
+    });
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Profile update failed:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Profile update failed",
+    });
+  }
 };
 
 export const getStudentIdCardController = async (

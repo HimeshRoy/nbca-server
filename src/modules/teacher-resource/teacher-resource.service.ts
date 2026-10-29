@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma";
+import { deleteFileFromCloudinaryByUrl } from "../../services/cloudinary/cloudinary.service";
 
 export const createTeacherResource = async (
   teacherId: string,
@@ -103,7 +104,10 @@ export const updateTeacherResource = async (
   });
 };
 
-export const deleteTeacherResource = async (teacherId: string, id: string) => {
+export const deleteTeacherResource = async (
+  teacherId: string,
+  id: string,
+) => {
   const resource = await prisma.resource.findFirst({
     where: {
       id,
@@ -115,6 +119,25 @@ export const deleteTeacherResource = async (teacherId: string, id: string) => {
     throw new Error("Resource not found");
   }
 
+  // Delete the file from Cloudinary
+  if (resource.fileUrl) {
+    try {
+      await deleteFileFromCloudinaryByUrl(
+        resource.fileUrl,
+      );
+    } catch (error) {
+      console.error(
+        "Failed to delete teacher resource file from Cloudinary:",
+        error,
+      );
+
+      throw new Error(
+        "Failed to delete teacher resource file",
+      );
+    }
+  }
+
+  // Delete the database record
   return prisma.resource.delete({
     where: {
       id,

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyAttendanceController = exports.getAttendanceController = exports.createAttendanceController = void 0;
+exports.markLiveClassLeaveController = exports.getMyAttendanceController = exports.getAttendanceController = exports.createAttendanceController = void 0;
 const attendance_service_1 = require("./attendance.service");
 const createAttendanceController = async (req, res) => {
     const user = req.user;
@@ -29,3 +29,29 @@ const getMyAttendanceController = async (req, res) => {
     });
 };
 exports.getMyAttendanceController = getMyAttendanceController;
+const markLiveClassLeaveController = async (req, res) => {
+    try {
+        const studentId = req.user.id;
+        const liveClassId = req.params.liveClassId;
+        if (!liveClassId) {
+            return res.status(400).json({
+                success: false,
+                message: "Live class ID is required",
+            });
+        }
+        const result = await (0, attendance_service_1.markLiveClassLeave)(studentId, liveClassId);
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    }
+    catch (error) {
+        console.error("Mark live class leave error:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message ||
+                "Failed to update live class attendance",
+        });
+    }
+};
+exports.markLiveClassLeaveController = markLiveClassLeaveController;

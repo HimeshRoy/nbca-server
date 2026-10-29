@@ -10,6 +10,7 @@ const teacher_class_controller_1 = require("./teacher-class.controller");
 const router = (0, express_1.Router)();
 router.post("/", (0, auth_1.auth)("ADMIN"), (0, validateRequest_1.validateRequest)(teacher_validation_1.createTeacherSchema), teacher_controller_1.createTeacherController);
 router.get("/", (0, auth_1.auth)("ADMIN"), teacher_controller_1.getAllTeachersController);
+router.get("/me", (0, auth_1.auth)("TEACHER"), teacher_controller_1.getMyProfileController);
 router.post("/:teacherId/classes", teacher_class_controller_1.assignClassesToTeacherController);
 router.post("/:teacherId/subjects", teacher_assignment_controller_1.assignSubjectsToTeacherController);
 router.get("/:id", teacher_controller_1.getTeacherByIdController);

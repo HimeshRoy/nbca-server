@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLiveClassStatsController = exports.getLiveClassAttendanceController = exports.joinLiveClassController = exports.getStudentLiveClassesController = exports.getUpcomingClassesController = exports.deleteLiveClassController = exports.updateLiveClassController = exports.getLiveClassByIdController = exports.getLiveClassesController = exports.createLiveClassController = void 0;
+exports.getLiveClassStatsController = exports.getLiveClassAttendanceController = exports.joinLiveClassController = exports.getStudentLiveClassesController = exports.getUpcomingClassesController = exports.endLiveClassController = exports.deleteLiveClassController = exports.updateLiveClassController = exports.getLiveClassByIdController = exports.getLiveClassesController = exports.createLiveClassController = void 0;
 const live_class_service_1 = require("./live-class.service");
 const createLiveClassController = async (req, res) => {
     const user = req.user;
@@ -47,6 +47,16 @@ const deleteLiveClassController = async (req, res) => {
     });
 };
 exports.deleteLiveClassController = deleteLiveClassController;
+const endLiveClassController = async (req, res) => {
+    const user = req.user;
+    const result = await (0, live_class_service_1.endLiveClass)(user.id, req.params.id);
+    res.status(200).json({
+        success: true,
+        message: "Live class ended successfully.",
+        data: result,
+    });
+};
+exports.endLiveClassController = endLiveClassController;
 const getUpcomingClassesController = async (req, res) => {
     const result = await (0, live_class_service_1.getUpcomingClasses)();
     res.json({

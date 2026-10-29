@@ -1,9 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_1 = require("../../middlewares/auth");
 const live_class_controller_1 = require("./live-class.controller");
+const room_routes_1 = __importDefault(require("./room/room.routes"));
+const removal_routes_1 = __importDefault(require("./removal/removal.routes"));
 const router = (0, express_1.Router)();
+router.use(room_routes_1.default);
+router.use("/remove", removal_routes_1.default);
 router.post("/", (0, auth_1.auth)("TEACHER"), live_class_controller_1.createLiveClassController);
 router.get("/", (0, auth_1.auth)("TEACHER"), live_class_controller_1.getLiveClassesController);
 router.get("/upcoming", (0, auth_1.auth)("STUDENT"), live_class_controller_1.getUpcomingClassesController);
@@ -11,6 +18,7 @@ router.get("/student", (0, auth_1.auth)("STUDENT"), live_class_controller_1.getS
 router.get("/stats", (0, auth_1.auth)("TEACHER"), live_class_controller_1.getLiveClassStatsController);
 router.get("/join/:id", (0, auth_1.auth)("STUDENT"), live_class_controller_1.joinLiveClassController);
 router.get("/:id/attendance", (0, auth_1.auth)("TEACHER"), live_class_controller_1.getLiveClassAttendanceController);
+router.post("/:id/end", (0, auth_1.auth)("TEACHER"), live_class_controller_1.endLiveClassController);
 router.get("/:id", (0, auth_1.auth)("TEACHER"), live_class_controller_1.getLiveClassByIdController);
 router.patch("/:id", (0, auth_1.auth)("TEACHER"), live_class_controller_1.updateLiveClassController);
 router.delete("/:id", (0, auth_1.auth)("TEACHER"), live_class_controller_1.deleteLiveClassController);

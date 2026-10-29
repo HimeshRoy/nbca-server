@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
 import * as XLSX from "xlsx";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "../../config/s3";
+
 import { prisma } from "../../config/prisma";
+
+import {
+  uploadFileToCloudinary,
+} from "../../services/cloudinary/cloudinary.service";
 
 import {
   createQuestion,
@@ -12,52 +15,187 @@ import {
   deleteQuestion,
 } from "./question.service";
 
-export const createQuestionController = async (req: Request, res: Response) => {
-  const result = await createQuestion(req.body);
-
-  res.status(201).json({
-    success: true,
-    data: result,
-  });
+type UploadedFiles = {
+  [fieldname: string]: Express.Multer.File[];
 };
 
-export const getQuestionsController = async (req: Request, res: Response) => {
-  const result = await getQuestions(req.params.testId as string);
+const uploadQuestionImages = async (
+  files: UploadedFiles | undefined,
+) => {
+  const imageFields = [
+    "questionImage",
+    "optionAImage",
+    "optionBImage",
+    "optionCImage",
+    "optionDImage",
+  ] as const;
 
-  res.json({
-    success: true,
-    data: result,
-  });
+  const imageUrls: Record<string, string> = {};
+
+  if (!files) {
+    return imageUrls;
+  }
+
+  for (const field of imageFields) {
+    const file = files[field]?.[0];
+
+    if (!file) {
+      continue;
+    }
+
+    const uploadResult = await uploadFileToCloudinary(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+
+    imageUrls[field] = uploadResult.secure_url;
+  }
+
+  return imageUrls;
+};
+
+export const createQuestionController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const files = req.files as UploadedFiles | undefined;
+
+    const imageUrls = await uploadQuestionImages(files);
+
+    const result = await createQuestion({
+      ...req.body,
+      ...imageUrls,
+
+      marks: Number(req.body.marks) || 1,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Question creation failed:", error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Question creation failed",
+    });
+  }
+};
+
+export const getQuestionsController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const result = await getQuestions(
+      req.params.testId as string,
+    );
+
+    return res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Failed to get questions:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get questions",
+    });
+  }
 };
 
 export const getQuestionByIdController = async (
   req: Request,
   res: Response,
 ) => {
-  const result = await getQuestionById(req.params.id as string);
+  try {
+    const result = await getQuestionById(
+      req.params.id as string,
+    );
 
-  res.json({
-    success: true,
-    data: result,
-  });
+    return res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Failed to get question:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get question",
+    });
+  }
 };
 
-export const updateQuestionController = async (req: Request, res: Response) => {
-  const result = await updateQuestion(req.params.id as string, req.body);
+export const updateQuestionController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const files = req.files as UploadedFiles | undefined;
 
-  res.json({
-    success: true,
-    data: result,
-  });
+    const imageUrls = await uploadQuestionImages(files);
+
+    const result = await updateQuestion(
+      req.params.id as string,
+      {
+        ...req.body,
+        ...imageUrls,
+
+        ...(req.body.marks !== undefined && {
+          marks: Number(req.body.marks) || 1,
+        }),
+      },
+    );
+
+    return res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Failed to update question:", error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to update question",
+    });
+  }
 };
 
-export const deleteQuestionController = async (req: Request, res: Response) => {
-  const result = await deleteQuestion(req.params.id as string);
+export const deleteQuestionController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const result = await deleteQuestion(
+      req.params.id as string,
+    );
 
-  res.json({
-    success: true,
-    data: result,
-  });
+    return res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Failed to delete question:", error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to delete question",
+    });
+  }
 };
 
 export const uploadQuestionImageController = async (
@@ -72,32 +210,25 @@ export const uploadQuestionImageController = async (
       });
     }
 
-    const fileName = `${Date.now()}-${req.file.originalname}`;
-
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-
-        Key: fileName,
-
-        Body: req.file.buffer,
-
-        ContentType: req.file.mimetype,
-      }),
+    const uploadResult = await uploadFileToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
     );
 
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: {
-        fileUrl,
+        fileUrl: uploadResult.secure_url,
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Question image Cloudinary upload failed:",
+      error,
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Upload failed",
     });
@@ -116,7 +247,9 @@ export const uploadQuestionsExcelController = async (
       });
     }
 
-    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const workbook = XLSX.read(req.file.buffer, {
+      type: "buffer",
+    });
 
     const sheetName = workbook.SheetNames[0];
 
@@ -144,9 +277,7 @@ export const uploadQuestionsExcelController = async (
     }));
 
     console.log("FILE:", req.file);
-
     console.log("BODY:", req.body);
-
     console.log("QUESTIONS:", questions);
 
     await prisma.question.createMany({
@@ -160,7 +291,7 @@ export const uploadQuestionsExcelController = async (
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Excel upload failed",
     });

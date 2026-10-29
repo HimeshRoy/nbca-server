@@ -1,8 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteChapter = exports.updateChapter = exports.getChapterById = exports.getAllChapters = exports.createChapter = void 0;
+exports.getStudentChapters = exports.getChaptersBySubject = exports.deleteChapter = exports.updateChapter = exports.getChapterById = exports.getAllChapters = exports.createChapter = void 0;
 const prisma_1 = require("../../config/prisma");
 const createChapter = async (payload) => {
+    const subject = await prisma_1.prisma.subject.findUnique({
+        where: {
+            id: payload.subjectId,
+        },
+    });
     return prisma_1.prisma.chapter.create({
         data: payload,
         include: {
@@ -47,3 +52,37 @@ const deleteChapter = async (id) => {
     });
 };
 exports.deleteChapter = deleteChapter;
+const getChaptersBySubject = async (subjectId) => {
+    return prisma_1.prisma.chapter.findMany({
+        where: {
+            subjectId,
+        },
+        orderBy: {
+            chapterNo: "asc",
+        },
+    });
+};
+exports.getChaptersBySubject = getChaptersBySubject;
+const getStudentChapters = async (studentId, subjectId) => {
+    const student = await prisma_1.prisma.student.findUnique({
+        where: {
+            id: studentId,
+        },
+    });
+    if (!student) {
+        throw new Error("Student not found");
+    }
+    return prisma_1.prisma.chapter.findMany({
+        where: {
+            subjectId,
+            subject: {
+                classId: student.classId,
+                boardId: student.boardId,
+            },
+        },
+        orderBy: {
+            createdAt: "asc",
+        },
+    });
+};
+exports.getStudentChapters = getStudentChapters;

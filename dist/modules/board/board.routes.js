@@ -5,4 +5,7 @@ const board_controller_1 = require("./board.controller");
 const router = (0, express_1.Router)();
 router.post("/", board_controller_1.createBoardController);
 router.get("/", board_controller_1.getAllBoardsController);
+router.get("/:id", board_controller_1.getBoardByIdController);
+router.patch("/:id", board_controller_1.updateBoardController);
+router.delete("/:id", board_controller_1.deleteBoardController);
 exports.default = router;

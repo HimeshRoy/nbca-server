@@ -2,9 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const chapter_controller_1 = require("./chapter.controller");
+const auth_1 = require("../../middlewares/auth");
 const router = (0, express_1.Router)();
 router.post("/", chapter_controller_1.createChapterController);
 router.get("/", chapter_controller_1.getAllChaptersController);
+router.get("/student/:subjectId", (0, auth_1.auth)("STUDENT"), chapter_controller_1.getStudentChaptersController);
+router.get("/subject/:subjectId", chapter_controller_1.getChaptersBySubjectController);
 router.get("/:id", chapter_controller_1.getChapterByIdController);
 router.patch("/:id", chapter_controller_1.updateChapterController);
 router.delete("/:id", chapter_controller_1.deleteChapterController);

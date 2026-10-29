@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteContent = exports.updateContent = exports.getContentById = exports.getAllContents = exports.createContent = void 0;
+exports.getContentsByChapter = exports.deleteContent = exports.updateContent = exports.getContentById = exports.getAllContents = exports.createContent = void 0;
 const prisma_1 = require("../../config/prisma");
 const createContent = async (payload) => {
     return prisma_1.prisma.content.create({
@@ -50,3 +50,14 @@ const deleteContent = async (id) => {
     });
 };
 exports.deleteContent = deleteContent;
+const getContentsByChapter = async (chapterId) => {
+    return prisma_1.prisma.content.findMany({
+        where: {
+            chapterId,
+        },
+        orderBy: {
+            orderNo: "asc",
+        },
+    });
+};
+exports.getContentsByChapter = getContentsByChapter;

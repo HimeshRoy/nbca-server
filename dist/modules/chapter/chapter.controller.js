@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteChapterController = exports.updateChapterController = exports.getChapterByIdController = exports.getAllChaptersController = exports.createChapterController = void 0;
+exports.getStudentChaptersController = exports.getChaptersBySubjectController = exports.deleteChapterController = exports.updateChapterController = exports.getChapterByIdController = exports.getAllChaptersController = exports.createChapterController = void 0;
 const chapter_service_1 = require("./chapter.service");
 const createChapterController = async (req, res) => {
     const result = await (0, chapter_service_1.createChapter)(req.body);
@@ -42,3 +42,19 @@ const deleteChapterController = async (req, res) => {
     });
 };
 exports.deleteChapterController = deleteChapterController;
+const getChaptersBySubjectController = async (req, res) => {
+    const result = await (0, chapter_service_1.getChaptersBySubject)(req.params.subjectId);
+    res.json({
+        success: true,
+        data: result,
+    });
+};
+exports.getChaptersBySubjectController = getChaptersBySubjectController;
+const getStudentChaptersController = async (req, res) => {
+    const result = await (0, chapter_service_1.getStudentChapters)(req.user.id, req.params.subjectId);
+    res.json({
+        success: true,
+        data: result,
+    });
+};
+exports.getStudentChaptersController = getStudentChaptersController;

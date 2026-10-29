@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadTeacherResourceController = exports.deleteTeacherResourceController = exports.updateTeacherResourceController = exports.getTeacherResourceByIdController = exports.getTeacherResourcesController = exports.createTeacherResourceController = void 0;
-const client_s3_1 = require("@aws-sdk/client-s3");
-const s3_1 = require("../../config/s3");
+exports.getTeacherResourceStatsController = exports.uploadTeacherResourceController = exports.deleteTeacherResourceController = exports.updateTeacherResourceController = exports.getTeacherResourceByIdController = exports.getTeacherResourcesController = exports.createTeacherResourceController = void 0;
+const cloudinary_service_1 = require("../../services/cloudinary/cloudinary.service");
 const teacher_resource_service_1 = require("./teacher-resource.service");
 const createTeacherResourceController = async (req, res) => {
     const user = req.user;
@@ -51,39 +50,36 @@ const deleteTeacherResourceController = async (req, res) => {
 exports.deleteTeacherResourceController = deleteTeacherResourceController;
 const uploadTeacherResourceController = async (req, res) => {
     try {
-        const user = req.user;
         if (!req.file) {
             return res.status(400).json({
                 success: false,
                 message: "No file uploaded",
             });
         }
-        const fileName = `${Date.now()}-${req.file.originalname}`;
-        await s3_1.s3.send(new client_s3_1.PutObjectCommand({
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: fileName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
-        }));
-        const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
-        const result = await (0, teacher_resource_service_1.createTeacherResource)(user.id, {
-            title: req.body.title,
-            type: req.body.type,
-            contentId: req.body.contentId,
-            fileUrl,
-            fileSize: req.file.size,
-        });
-        res.status(201).json({
+        const uploadResult = await (0, cloudinary_service_1.uploadFileToCloudinary)(req.file.buffer, req.file.originalname, req.file.mimetype);
+        return res.status(200).json({
             success: true,
-            data: result,
+            data: {
+                fileUrl: uploadResult.secure_url,
+                fileSize: req.file.size,
+            },
         });
     }
     catch (error) {
-        console.error(error);
-        res.status(500).json({
+        console.error("Teacher resource Cloudinary upload failed:", error);
+        return res.status(500).json({
             success: false,
             message: "Upload failed",
         });
     }
 };
 exports.uploadTeacherResourceController = uploadTeacherResourceController;
+const getTeacherResourceStatsController = async (req, res) => {
+    const user = req.user;
+    const result = await (0, teacher_resource_service_1.getTeacherResourceStats)(user.id);
+    res.json({
+        success: true,
+        data: result,
+    });
+};
+exports.getTeacherResourceStatsController = getTeacherResourceStatsController;
